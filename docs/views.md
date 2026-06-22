@@ -20,10 +20,10 @@ This module wraps every dataview RPC and adds three high-level helpers:
      `sort_view_relations`) controls which relations show as columns in one
      view, and in what order. `update_view` does NOT change view columns.
 
-2. Gallery covers come from a relation, not a file id. Set the view's
-   `coverRelationKey` (for example `"picture"` or `"cover"`) with
-   `set_gallery_cover`. Setting an object cover from a file id is a different
-   operation (`Anytype.set_cover`), unrelated to galleries.
+2. Gallery covers come from a relation, a property that holds an image. Set the
+   view's `coverRelationKey` (for example `"picture"` or `"cover"`) with
+   `set_gallery_cover`. Setting an object cover from a file id is a separate
+   operation (`Anytype.set_cover`) that applies to a whole object.
 
 ## Setup
 
@@ -138,9 +138,9 @@ views.remove_relation("bafy_set_id", "priority")
 
 ### add_view_relation(set_id, view_id, relation_key, *, is_visible=True, block_id="dataview")
 
-Add a relation as a column to one view and set its visibility. Use this, not
-`update_view`, to control a view's columns. The relation should already be in
-the block relation pool (`add_relation`). Returns the raw response.
+Add a relation as a column to one view and set its visibility. Use this method
+to control a view's columns. The relation should already be in the block
+relation pool (`add_relation`). Returns the raw response.
 
 ```python
 views.add_view_relation("bafy_set_id", "view_id_1", "tag")

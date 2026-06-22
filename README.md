@@ -1,12 +1,12 @@
 # anytype-grpc
 
-Full-control Python client and MCP server for [Anytype](https://anytype.io), built on its internal gRPC API.
+Edit [Anytype](https://anytype.io) blocks, layouts, and views from Python or MCP, over its internal gRPC API.
 
 ## Why this exists
 
-Every other Anytype library wraps the official **Local HTTP API**. That API is stable and good, but intentionally limited: it can search, create objects, set properties, and patch markdown, and that is roughly it. It cannot edit the block tree, change layouts, edit dataview or set views, or set covers.
+Every other Anytype library wraps the official **Local HTTP API**, which covers search, object creation, properties, and markdown. The block tree, layouts, set and query views, and covers live a layer deeper.
 
-This library talks to the layer underneath: the internal gRPC service (`anytype-heart`'s `ClientCommands`) that the Anytype desktop app itself uses for every action. That means it can do everything the desktop UI can do, programmatically:
+This library talks to that layer: the internal gRPC service (`anytype-heart`'s `ClientCommands`) that the Anytype desktop app uses for every action. It can do everything the desktop UI does, programmatically:
 
 - create, move, delete, and restyle any block (text, headers, toggles, checkboxes, code, tables, links)
 - build column and grid layouts
@@ -19,7 +19,7 @@ All 332 RPC methods are reachable. The common, fiddly ones have ergonomic helper
 
 ## How it works
 
-The desktop app runs a local helper process that serves gRPC on a loopback port. This library auto-discovers that port, authenticates with a session token derived from your account, and speaks the same protocol the UI speaks. Nothing is reimplemented; the real Anytype engine does all the work, and this is a thin remote control for it.
+The desktop app runs a local helper process that serves gRPC on a loopback port. This library auto-discovers that port, authenticates with a session token derived from your account, and speaks the same protocol the UI speaks. The real Anytype engine does all the work, and this library is a thin remote control over it.
 
 ## Install
 
@@ -32,7 +32,7 @@ Requires the Anytype desktop app to be running on the same machine.
 
 ## Authenticate
 
-The restricted Local API key is not enough for the full gRPC surface. You need a session token derived from your account. Mint one from your recovery phrase (the words you saved when you set up Anytype):
+The full gRPC surface needs a session token derived from your account. Mint one from your recovery phrase (the words you saved when you set up Anytype):
 
 ```bash
 python -m anytype_grpc.auth
@@ -44,7 +44,7 @@ It reads the phrase from hidden input, never writes it to disk, and prints a tok
 export ANYTYPE_TOKEN="<the token>"
 ```
 
-The token grants full control of your local vault. Treat it like a password and never commit it.
+The token grants complete access to your local vault. Treat it like a password and never commit it.
 
 ## Quick start
 
@@ -120,7 +120,7 @@ anytype-grpc-mcp
 
 ## Versioning
 
-The internal gRPC API is not a public, stable contract. The vendored protos are pinned to a specific Anytype version (see `protos/`). If you upgrade the desktop app, regenerate the bindings with `scripts/gen_protos.sh` against the matching `anytype-heart` tag.
+The internal gRPC API is private and can change between Anytype versions. The vendored protos are pinned to a specific Anytype version (see `protos/`). If you upgrade the desktop app, regenerate the bindings with `scripts/gen_protos.sh` against the matching `anytype-heart` tag.
 
 ## License
 

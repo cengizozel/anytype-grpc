@@ -39,11 +39,12 @@ editable object (a page, note, task, and so on).
 ## Things to remember
 
 - You cannot add blocks to a Type object or a Set object. The server replies
-  "restricted: Blocks". Edit those through object details instead (see the
-  objects domain).
-- Per-view dataview columns are not handled here; they live in the views domain.
-- A horizontal grid is not one call. You create the cards as a vertical stack,
-  then move them so they wrap into columns. Use `grid()`; it does the moves.
+  "restricted: Blocks". Edit those through object details (see the objects
+  domain).
+- Per-view dataview columns live in the views domain.
+- A horizontal grid takes several calls. You create the cards as a vertical
+  stack, then move them so they wrap into columns. Use `grid()`; it does the
+  moves.
 - `Inner` nesting preserves the order of the moved blocks. `make_toggle()` uses
   this to place children inside a toggle.
 

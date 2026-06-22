@@ -21,20 +21,22 @@ when there is no hand-written helper for it:
     req.limit = 50
     resp = at.call("ObjectSearch", request=req)
 
-    # Get the request class directly if you want full control.
+    # Get the request class directly for low-level access.
     cls = at.request_type("BlockCreate")   # anytype.Rpc.Block.Create.Request
 
     # Get the response straight back as a plain dict.
     d = at.call_dict("WorkspaceGetAll")
 
-So coverage is total: the helpers below are conveniences, not gates. Anything the
+So coverage is total: the helpers below are conveniences that add ergonomics on
+top of a surface that is already fully reachable. Anything the
 Anytype app itself can do over gRPC, you can do here with `at.call("MethodName", ...)`.
 
 ## Legend
 
 - The "Helper" column names the ergonomic wrapper, if one exists in this library.
 - A blank Helper cell means "call it by name with `at.call`": still fully supported,
-  just without a tailored signature or extra convenience logic.
+  reached directly by method name (a tailored signature or extra convenience logic
+  is what a named helper would add).
 - Helper locations:
   - `at.<name>` is a method on the `Anytype` client (`client.py`).
   - `Objects.*`, `Blocks.*`, `Views.*`, `Spaces.*`, `Types.*`, `Search.*`, `Files.*`
@@ -606,15 +608,15 @@ handle them, and they are documented here so raw callers do not get stuck.
   `BlockDataviewViewRelationRemove` to drop them.
 - Horizontal grids of blocks: create the cards first, then move the second card
   to position "Right" of the first card, and move each later card to "Right" of
-  the previous column block (the layout block whose style is "Column"), not of
-  the card itself.
+  the previous column block (the layout block whose style is "Column"). The drop
+  target for later cards is that column block, which wraps the card.
 - The "Inner" position nests moved blocks under the target. This is how toggles
   get their children. Order is preserved.
 - You cannot add blocks to a Type object or a Set object. The server returns
-  "restricted: Blocks". Change those through details instead.
+  "restricted: Blocks". Change those through their details.
 - Image cover on an object: set details `coverType=1` and `coverId=<file object id>`.
-  For a set or collection gallery the cover comes from a relation, so set the
-  view `coverRelationKey` (for example "picture") instead.
+  For a set or collection gallery the cover comes from a relation, a property
+  that holds an image, so set the view `coverRelationKey` (for example "picture").
 - FileUpload: the desktop helper is sandboxed and cannot read `/tmp`, and fetching
   hotlink-protected URLs can return 403. The reliable route is to serve the file
   over `http://127.0.0.1` and pass that url.
@@ -623,5 +625,5 @@ handle them, and they are documented here so raw callers do not get stuck.
 
 Every capability of the Anytype desktop app that goes through gRPC is in this
 catalog, and every one is callable today with `at.call("MethodName", ...)`. The
-named helpers add ergonomics and encode the gotchas above, but they are never a
-limit on what you can reach.
+named helpers add ergonomics and encode the gotchas above, and the full surface
+stays reachable through `at.call` whatever helpers exist.

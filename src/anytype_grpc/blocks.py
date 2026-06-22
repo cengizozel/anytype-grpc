@@ -296,7 +296,7 @@ class Blocks:
             file_object_id: the file object id returned by upload_file.
             kind: file type name, one of "File", "Image", "Video", "Audio",
                 "PDF". Picks how Anytype renders it.
-            embed: if True, render embedded (style Embed) instead of a link.
+            embed: if True, render embedded (style Embed). The default is a link.
             target_id: an existing block to insert relative to. None appends.
             position: where to insert, one of POSITIONS.
 
@@ -319,7 +319,7 @@ class Blocks:
         """Create a bookmark block for a web URL.
 
         The block starts empty and Anytype fetches the page title and preview
-        asynchronously. To force a fetch with full control, see the bookmark
+        asynchronously. To control the fetch yourself, see the bookmark
         RPCs; this helper just creates the block with the URL set.
 
         Args:
@@ -568,7 +568,7 @@ class Blocks:
         req.contextId = context_id
         req.blockId = block_id
         # The Range field is literally named "from" (a Python keyword), so it
-        # must be set with setattr rather than attribute access.
+        # must be assigned with setattr.
         setattr(req.range, "from", at_offset)
         req.range.to = at_offset
         if style is not None:
@@ -818,8 +818,8 @@ class Blocks:
         second card to the Right of the first card. Moving Right of a normal
         block makes Anytype wrap both in a Row layout with two Column layout
         blocks. Each later card in the row is then moved to the Right of the
-        PREVIOUS card's parent Column block, not the card itself, so it lands as
-        a new column rather than nesting. Because we cannot read back the new
+        PREVIOUS card's parent Column block, so it lands as
+        a new sibling column. Because we cannot read back the new
         column ids offline, this helper moves each later card Right of the
         previous card; the server resolves that to the enclosing column. If you
         need pixel exact control, do the moves yourself with move().

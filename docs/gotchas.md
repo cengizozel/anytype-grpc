@@ -19,7 +19,7 @@ document were confirmed.
 
 ---
 
-## 1. View columns: use the ViewRelation calls, not ViewUpdate
+## 1. View columns: use the ViewRelation calls (ViewUpdate changes view meta only)
 
 The trap: you want to change which relations show as columns in one view of a
 set or collection, so you reach for `BlockDataviewViewUpdate` and set its
@@ -36,7 +36,7 @@ The correct approach: add, remove, and order columns with the dedicated calls.
 
 - `BlockDataviewViewRelationAdd` adds one column. Its request has
   `contextId`, `blockId`, `viewId`, and a single nested `relation` message
-  (note: singular `relation`, not `relations`). The relation message has
+  (note: the field is singular `relation`). The relation message has
   `key` and `isVisible` (plus `width`, `align`, and date-format fields).
 - `BlockDataviewViewRelationSort` sets left-to-right order. It takes a
   repeated `relationKeys` (the full ordered list of keys).
@@ -78,13 +78,13 @@ Why: when you move a block to the "Right" of another block, Anytype wraps the
 pair in a horizontal Row layout, and each side becomes a Column layout block
 (`Block.Content.Layout.Style` value `Column = 1`). The card you moved is now a
 child inside a Column block. To add a third column you must position relative to
-that Column block, not relative to the card inside it. Positioning relative to
-the card again puts the new block inside the existing column.
+that Column block. Positioning relative to the card again puts the new block
+inside the existing column.
 
 The correct approach: move the second card to the "Right" of the first card
 (this creates the row and two columns). For every later card, move it to the
-"Right" of the PREVIOUS COLUMN block (the layout block whose style is `Column`),
-not the previous card. Read the object after each move (`at.get_object(page)`)
+"Right" of the PREVIOUS COLUMN block (the layout block whose style is `Column`,
+which wraps the previous card). Read the object after each move (`at.get_object(page)`)
 to find the new Column block ids, or track them from the move responses.
 
 ```python
@@ -113,9 +113,9 @@ body of a toggle), but "Bottom" or "Top" just place them as siblings.
 
 Why: child placement is a distinct position value. The `position` enum is
 `None, Top, Bottom, Left, Right, Inner, Replace, InnerFirst`. "Inner" makes the
-moved blocks children of the target; "Bottom"/"Top" keep them siblings. "Inner"
-appends them inside while preserving the order of `blockIds`. "InnerFirst"
-inserts them as the first children instead.
+moved blocks children of the target, while "Bottom" and "Top" keep them siblings.
+"Inner" appends them inside while preserving the order of `blockIds`. "InnerFirst"
+inserts them as the first children.
 
 The correct approach: move with position "Inner" and the toggle (or other
 container) block as the drop target.
@@ -143,7 +143,7 @@ The correct approach: change them through their details (relation values) and,
 for sets, through the dataview view RPCs. Do not try to write blocks.
 
 ```python
-# Describe a Type by setting its details, not by adding a description block.
+# Describe a Type by setting its details (the description relation holds the text).
 at.set_details("bafy_type_id", {"description": "Projects we are tracking."})
 ```
 
@@ -152,7 +152,7 @@ link to it.
 
 ---
 
-## 5. Two different "covers": object cover (details) vs gallery cover (relation)
+## 5. Two different "covers": the object cover lives in details, the gallery cover in a relation
 
 The trap: you set `coverRelationKey` hoping to give an object a banner image, or
 you set `coverType`/`coverId` hoping to give a gallery its card images. Neither
@@ -164,7 +164,7 @@ Why: there are two unrelated cover concepts.
   object's details: `coverType` and `coverId`. For an uploaded image file, set
   `coverType = 1` and `coverId = <file object id from FileUpload>`. You can also
   set `coverX` and `coverY` for the focal point.
-- A gallery view's card cover is not a file id at all. Each card pulls its cover
+- A gallery view's card cover comes from a relation. Each card pulls its cover
   from a relation on the object it represents. You set the view's
   `coverRelationKey` (for example `"picture"` or `"cover"`) via
   `BlockDataviewViewUpdate`, and optionally `coverFit`. The actual image then
@@ -177,7 +177,7 @@ The correct approach: pick the right one.
 file_id = at.upload_file(url="http://127.0.0.1:8000/banner.jpg")
 at.set_cover("bafy_page_id", file_id)        # sets coverType=1, coverId=file_id
 
-# Gallery card cover from a relation (no file id here).
+# Gallery card cover from a relation (a relation key supplies the image).
 req = at.new_request("BlockDataviewViewUpdate")
 req.contextId = "bafy_set_id"
 req.blockId = "dataview"
@@ -190,7 +190,7 @@ at.call("BlockDataviewViewUpdate", req)      # or Views.set_gallery_cover(...)
 
 ---
 
-## 6. FileUpload is sandboxed: serve over http://127.0.0.1 instead
+## 6. FileUpload is sandboxed: serve over http://127.0.0.1
 
 The trap: you call `FileUpload` with `localPath` pointing at a file in `/tmp`,
 or with a `url` to a CDN image, and it fails: the local path is not readable, or
@@ -232,9 +232,9 @@ horizontal layout, so it is lost.
 
 The correct approach: treat layout as something you build and maintain through
 the block RPCs (`BlockCreate`, `BlockListMoveToExistingObject` with "Right" and
-"Inner"), not through markdown. Use markdown import only for plain prose, or for
-the initial text of a page you will then arrange. Do not round-trip a
-layout-heavy page through markdown and expect the layout to survive.
+"Inner"). Use markdown import for plain prose, or for the initial text of a page
+you will then arrange. A layout-heavy page keeps its layout when you maintain it
+through the block RPCs, so round-tripping it through markdown drops the layout.
 
 ```python
 # Fine: import prose to seed a page.
@@ -284,14 +284,14 @@ applies: bin the templates in the same pass or they linger.
 
 ---
 
-## 9. Port discovery: the gRPC port is not fixed
+## 9. Port discovery: the gRPC port changes across restarts
 
 The trap: you hardcode `127.0.0.1:31007` (or whatever you saw once), and after
 the next app restart your client connects to a dead or wrong port.
 
 Why: the desktop app starts a helper process (`anytypeHelper`) that opens
 several loopback ports (JSON HTTP API, gRPC, gRPC-web). The gRPC port is chosen
-at launch and changes across restarts. There is no fixed, advertised port.
+at launch and changes across restarts. The port is allocated dynamically each run.
 
 The correct approach: let the client discover it. By default `Anytype()` lists
 the loopback ports the helper process holds (`ss -tlnp`) and probes each with an
@@ -311,14 +311,14 @@ available; fall back to an explicit address.
 
 ---
 
-## 10. Version pinning: the internal API is not a stable contract
+## 10. Version pinning: the internal API changes between releases
 
 The trap: you upgrade the Anytype desktop app and your client starts failing
 with unknown fields, missing methods, or decode errors. Or you assume any
 method name from these docs exists in your build.
 
-Why: `ClientCommands` is an internal API of `anytype-heart`. It is not a public,
-versioned contract. Methods, fields, and enum values change between releases.
+Why: `ClientCommands` is an internal API of `anytype-heart`. It is private to the
+desktop app and versions with it. Methods, fields, and enum values change between releases.
 The bindings this library ships were generated from protos vendored at one
 specific `anytype-heart` version (see `protos/`), and this build exposes 333 RPC
 methods. A different app version can have a different surface.
@@ -333,5 +333,4 @@ print(at.app_version())          # the desktop app's version string
 ```
 
 If a method or field referenced in these docs is absent in your build, it is a
-version mismatch; regenerate against your app's tag rather than working around
-it.
+version mismatch. Regenerate against your app's tag to resolve it.

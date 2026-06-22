@@ -147,8 +147,8 @@ info = sp.open_space("bafy...space1")
 
 ### select_workspace(workspace_id)
 
-Make a workspace the active one. CHANGES STATE. This is a legacy selector; most
-flows use `open_space` instead. Provided for completeness.
+Make a workspace the active one. CHANGES STATE. This is a legacy selector kept
+for completeness. Most flows use `open_space`.
 
 - Parameters:
   - `workspace_id` (str): the workspace (space) to select.
@@ -319,7 +319,8 @@ print(res.get("account", {}).get("id"))
   single "rename space" RPC: renaming goes through WorkspaceSetInfo with a
   `name` detail, wrapped here as `set_space_info` and `rename_space`.
 - The ObjectSearch Filter message spells its relation key field `RelationKey`
-  with a capital R (not `relationKey`). `list_participants` accounts for this.
+  with a capital R, where the lowercase `relationKey` would be expected.
+  `list_participants` accounts for this.
 - Participants are objects with layout value 19 (participant). There is no
   dedicated "list participants" RPC, so this domain reaches them through search.
 - The invite flow has two sides. Owner: `generate_invite`, then later

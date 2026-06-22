@@ -135,14 +135,14 @@ three environment variables set.
 Every tool returns plain JSON (a dict, a list, or a string). Read tools
 (`search`, `get_object`) return the data. Write tools return a small confirmation
 like `{"ok": true}` or the new id, for example `{"object_id": "bafyrei..."}`.
-Failures are returned as `{"error": "RpcError: ..."}` rather than crashing the
-call, so the model gets a readable message.
+Failures are returned as `{"error": "RpcError: ..."}` so the call stays alive and
+the model gets a readable message.
 
 Key concepts to pass correctly:
 
 - An object id looks like `bafyrei...`. Get ids from `search`.
-- An object type is identified by a unique key like `ot-page` or `ot-note`, not
-  by a type object id.
+- An object type is identified by a unique key like `ot-page` or `ot-note`. This
+  key is what a type is addressed by, which can differ from a type object id.
 - A block id is found by reading an object with `get_object` (look in its
   blocks).
 - You cannot add blocks to a Type or Set object; edit those with `set_details`.
@@ -280,7 +280,7 @@ makes). When you are unsure of the exact fields, prefer a curated tool.
   `ANYTYPE_GRPC_ADDR` points at the wrong port. Leave the address unset to let
   the server auto-discover the port, or set it to the app's actual gRPC port.
 - "restricted: Blocks" when adding a block: the target is a Type or Set object.
-  Use `set_details` instead of `add_block` for those.
+  Use `set_details` for those (`add_block` works on Page objects).
 - Image upload fails for a local path or a remote URL: the desktop helper is
   sandboxed (it may not read `/tmp`) and hotlinked URLs can return 403. Serve the
   file over `http://127.0.0.1` and pass that URL to `upload_image`.

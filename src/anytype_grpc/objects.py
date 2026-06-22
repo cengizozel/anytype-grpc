@@ -21,10 +21,11 @@ Notes that matter:
 - Object "details" are the object's properties (relations). Plain Python values
   (str, number, bool, list, dict, None) are accepted and converted for you.
 - An object type is identified by its "unique key" (for example "ot-page",
-  "ot-note", "ot-bookmark"), not its object id. The type's unique key is what
-  the create and set-type calls expect.
+  "ot-note", "ot-bookmark"). The unique key is a stable string that can differ
+  from the type's object id. The type's unique key is what the create and
+  set-type calls expect.
 - You cannot add blocks to a Type or a Set object (the server replies
-  "restricted: Blocks"). Edit those through details instead.
+  "restricted: Blocks"). Edit those through details.
 - The image cover of an object is set by two details: coverType=1 and
   coverId=<file object id>. Use ``set_cover`` for that. The icon is set by the
   ``iconImage`` detail (an uploaded file object id) or the ``iconEmoji`` detail
@@ -107,8 +108,8 @@ class Objects:
 
         Args:
             type_unique_key: the object type's unique key, for example "ot-page",
-                "ot-note", or a custom type's key. This is not the type's object
-                id.
+                "ot-note", or a custom type's key. This is the stable unique
+                key string, which can differ from the type's object id.
             details: optional dict of {relation_key: value} to set on the new
                 object, for example {"name": "My page"}. Values are plain Python
                 types. None means no initial details.
@@ -444,7 +445,8 @@ class Objects:
         Args:
             object_id: the id of the object to edit.
             type_unique_key: the new object type's unique key, for example
-                "ot-note" (not the type's object id).
+                "ot-note" (the stable unique key string, which can differ from
+                the type's object id).
 
         Returns:
             The raw response message.
@@ -495,7 +497,8 @@ class Objects:
         return self.c.call("ObjectDuplicate", contextId=object_id).id
 
     def list_delete(self, object_ids):
-        """Permanently delete objects (not the bin; this removes them).
+        """Permanently delete objects (this removes them outright; the bin is a
+        separate operation, see set_archived).
 
         This deletes the objects from the local store and unsubscribes from
         remote changes. To move objects to the bin instead, use
@@ -586,8 +589,8 @@ class Objects:
     def to_collection(self, object_id):
         """Convert an existing object into a Collection.
 
-        A Collection is a manually curated list of objects (unlike a Set, which
-        is a live query).
+        A Collection is a manually curated list of objects (a Set is a live
+        query that collects objects automatically).
 
         Args:
             object_id: the id of the object to convert.
@@ -619,9 +622,10 @@ class Objects:
             no_collection: if True, do not wrap imported files in a collection.
             create_directory_pages: if True, create a page per source directory.
             include_properties_as_block: if True, render frontmatter properties
-                as a block instead of object relations.
-            update_existing: if True, update objects that already exist instead
-                of creating duplicates.
+                as a block in the page body (the default renders them as object
+                relations).
+            update_existing: if True, update objects that already exist (the
+                default creates a new duplicate for each import).
             no_progress: if True (default), suppress progress events.
 
         Returns:
@@ -661,7 +665,8 @@ class Objects:
                 in a list.
             format: the export format name. One of "Markdown" (default),
                 "Protobuf", "JSON", "DOT", "SVG", "GRAPH_JSON".
-            zip: if True, write a single zip file instead of loose files.
+            zip: if True, write a single zip file (the default writes loose
+                files into the directory).
             include_nested: if True (default), include linked/nested objects.
             include_files: if True (default), include attached files.
             include_archived: if True, also export archived objects.

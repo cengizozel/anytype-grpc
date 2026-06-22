@@ -74,7 +74,7 @@ class Files:
             local_path: an absolute path on disk. Note the desktop helper is
                 sandboxed and may be unable to read paths like /tmp; if a
                 local_path upload fails, serve the file over http://127.0.0.1
-                and pass it as ``url`` instead.
+                and pass that address as ``url``.
             kind: the file content type, one of "None", "File", "Image",
                 "Video", "Audio", "PDF". Default "Image". Use "File" for a
                 generic attachment.

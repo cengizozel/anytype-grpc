@@ -45,8 +45,8 @@ Design notes:
   type and an example, says what it returns, and lists common mistakes. The
   per-parameter help is attached with typing.Annotated and pydantic.Field so it
   shows up in the tool's input schema where the model can see it.
-- Errors are surfaced as a JSON object {"error": "..."} rather than raised, so a
-  calling model gets a readable message instead of a transport failure.
+- Errors are surfaced as a JSON object {"error": "..."} the caller can read, so a
+  calling model gets a readable message in place of a transport failure.
 """
 
 import json
@@ -73,7 +73,8 @@ mcp = FastMCP(
         "API. Use 'search' to find object ids, 'get_object' to read an object's "
         "blocks and details, and the create/add/edit/set tools to change things. "
         "Object ids look like 'bafyrei...'. An object 'type' is identified by a "
-        "unique key like 'ot-page' or 'ot-note', not by an object id. For any "
+        "unique key like 'ot-page' or 'ot-note'. This unique key is the type's "
+        "own identifier, which differs from an object id. For any "
         "operation the curated tools do not cover, use 'call_rpc' with the gRPC "
         "method name and a JSON request. Set the space with the ANYTYPE_SPACE_ID "
         "environment variable, or pass space_id where a tool accepts it."
@@ -152,7 +153,8 @@ def _parse_json_arg(value: Any, what: str) -> Any:
         "keys you asked for (default: id, name, type, layout, snippet). Common "
         "mistakes: passing a type's object id where a unique key is expected (use "
         "the 'types' filter with unique keys like 'ot-note'); expecting fuzzy "
-        "matching on ids (query is full text over name and snippet, not ids)."
+        "matching on ids (query is full text over name and snippet, and ids are "
+        "matched only by the 'types' filter)."
     )
 )
 def search(
@@ -211,8 +213,8 @@ def search(
         "after 'search' to read an object's contents, to find block ids before "
         "editing or deleting blocks, or to read property values. Returns a JSON "
         "dict with an 'objectView' holding 'blocks' and 'details'. Common "
-        "mistake: passing a name instead of an id (use 'search' first to get the "
-        "id)."
+        "mistake: passing a name where an id is required (use 'search' first to "
+        "get the id)."
     )
 )
 def get_object(
@@ -242,11 +244,13 @@ def get_object(
     description=(
         "Create a new object of a given type and return its new object id as a "
         "string. The type is given by its unique key (for example 'ot-page', "
-        "'ot-note', 'ot-task'), NOT by a type object id. You can set initial "
+        "'ot-note', 'ot-task'). This unique key is the type's own identifier, "
+        "which differs from a type object id. You can set initial "
         "properties with the 'details' dict (for example {'name': 'My page'}). "
         "Returns a dict {'object_id': '<new id>'}. Common mistakes: passing a "
-        "type object id instead of a unique key; trying to add blocks to a Type "
-        "or Set object later (that is restricted, edit those via set_details)."
+        "type object id where a unique key is required; trying to add blocks to a "
+        "Type or Set object later (that is restricted, edit those via "
+        "set_details)."
     )
 )
 def create_object(
@@ -254,7 +258,8 @@ def create_object(
         str,
         Field(description=(
             "The object type's unique key. Examples: 'ot-page', 'ot-note', "
-            "'ot-bookmark', or a custom type key. This is NOT a type object id."
+            "'ot-bookmark', or a custom type key. This is the type's own "
+            "identifier, which differs from a type object id."
         )),
     ],
     details: Annotated[
@@ -330,15 +335,17 @@ def add_block(
     link_to: Annotated[
         Optional[str],
         Field(description=(
-            "If set, create a link block pointing at this object id instead of a "
-            "text block. Example: 'bafyrei...'. Null creates a text block."
+            "If set, create a link block pointing at this object id (a text "
+            "block is the default). Example: 'bafyrei...'. Null creates a text "
+            "block."
         )),
     ] = None,
     card: Annotated[
         bool,
         Field(description=(
-            "When link_to is set, render the link as a card with a cover "
-            "instead of an inline link. Default false. Ignored for text blocks."
+            "When link_to is set, render the link as a card with a cover (an "
+            "inline link is the default). Default false. Ignored for text "
+            "blocks."
         )),
     ] = False,
     target_id: Annotated[
@@ -424,7 +431,7 @@ def edit_block_text(
     description=(
         "Delete one or more blocks from an object's content tree. Use get_object "
         "first to find the block ids. Returns {'ok': true} on success. Common "
-        "mistakes: passing an object id instead of block ids; deleting a parent "
+        "mistakes: passing an object id where block ids are required; deleting a parent "
         "block expecting children to survive (deleting a block deletes its "
         "subtree)."
     )
@@ -459,9 +466,10 @@ def delete_block(
         "how you rename an object, set its description, mark a task done, set a "
         "tag, and so on. It is also the way to edit Type and Set objects, which "
         "do not allow block edits. Returns {'ok': true} on success. Pass null as "
-        "a value to clear that relation. Common mistakes: using a relation's "
-        "display name instead of its key (use the key, for example 'done' not "
-        "'Done'); expecting this to add blocks (it only sets properties)."
+        "a value to clear that relation. Common mistakes: supplying a relation's "
+        "display name where its key is required (use the key, for example 'done', "
+        "which is the internal key and can differ from the display name 'Done'); "
+        "expecting this to add blocks (it only sets properties)."
     )
 )
 def set_details(
@@ -499,7 +507,8 @@ def set_details(
         "success. Common mistakes: passing an image URL here (upload it first "
         "with upload_image to get a file object id); confusing this with a "
         "gallery cover (a set or collection gallery takes its cover from a "
-        "relation via set_view's coverRelationKey, not from a file id)."
+        "relation via set_view's coverRelationKey, a property that holds an "
+        "image)."
     )
 )
 def set_cover(
@@ -631,9 +640,9 @@ def set_view_type(
     description=(
         "Set exactly which relations show as columns in a set or collection "
         "view, and in what left-to-right order. This adds each relation as a "
-        "visible column and orders them. Note: per-view visible columns cannot "
-        "be set through a plain view update; this tool uses the correct "
-        "relation-add and relation-sort calls. Returns {'ok': true} on success. "
+        "visible column and orders them. Note: per-view visible columns require "
+        "the dedicated relation-add and relation-sort calls, which this tool "
+        "issues for you. Returns {'ok': true} on success. "
         "Common mistakes: trying to set columns via set_view_type (wrong tool); "
         "passing relations that are not in the dataview's relation pool (they "
         "are added as view columns, but if they are not in the block pool you "
@@ -690,8 +699,9 @@ def set_visible_columns(
         "fields in camelCase (for example contextId, spaceId, objectId). Enum "
         "fields usually accept their value name as a string. Returns the response "
         "as a JSON dict, or {'error': '...'} on failure. Common mistakes: wrong "
-        "method name (it is case-sensitive, like 'ObjectSearch' not "
-        "'objectsearch'); wrong field names (use camelCase proto field names); "
+        "method name (it is case-sensitive, so write 'ObjectSearch' with that "
+        "exact capitalization); wrong field names (use camelCase proto field "
+        "names); "
         "forgetting required ids like contextId or spaceId. If you are unsure of "
         "the exact fields, prefer a curated tool."
     )

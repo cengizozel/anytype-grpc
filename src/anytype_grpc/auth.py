@@ -7,7 +7,7 @@ passing your recovery phrase (mnemonic) to WalletCreateSession.
 
 Security: the mnemonic is read from hidden stdin, never written to disk, and
 never passed as a process argument. Only the resulting token is printed. The
-token still grants full control of your local vault, so treat it like a
+token still grants complete access to your local vault, so treat it like a
 password and never commit it.
 
 Usage:

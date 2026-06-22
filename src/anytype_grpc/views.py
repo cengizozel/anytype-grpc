@@ -23,8 +23,9 @@ Important gotchas baked into this module:
   remove_relation) makes a relation available to the dataview at all. The
   per-view relation list (add_view_relation, isVisible) controls whether a
   relation shows as a column in that one view.
-- Gallery covers come from a relation, not from a file id. Set the view's
-  coverRelationKey (for example "picture" or "cover") with set_gallery_cover.
+- Gallery covers come from a relation, a property that holds an image. Set the
+  view's coverRelationKey (for example "picture" or "cover") with
+  set_gallery_cover.
 
 All ids you pass are object ids and view ids from the running space. This
 module never makes a call on its own at import time; constructing a request
@@ -328,9 +329,10 @@ class Views:
                           is_visible=True, block_id="dataview"):
         """Add a relation as a column to one view (and set its visibility).
 
-        Use this, not update_view, to control which relations show as columns
-        in a specific view. The relation should already be in the block's
-        relation pool (add_relation); if it is not, add it first.
+        Use this method to control which relations show as columns in a
+        specific view (update_view controls view meta). The relation should
+        already be in the block's relation pool (add_relation); if it is not,
+        add it first.
 
         Args:
             set_id: the set/collection object id (contextId).
@@ -737,9 +739,10 @@ class Views:
                          cover_fit=True, block_id="dataview", space_id=None):
         """Set the relation used as the gallery card cover (and fit).
 
-        A gallery's cards take their cover image from a relation, not from a
-        file id. This sets the view's coverRelationKey (and coverFit). Use a
-        relation that holds an image or file, for example "picture" or "cover".
+        A gallery's cards take their cover image from a relation, a property
+        that holds an image or file. This sets the view's coverRelationKey (and
+        coverFit). Use a relation that holds an image or file, for example
+        "picture" or "cover".
 
         Args:
             set_id: the set/collection object id.

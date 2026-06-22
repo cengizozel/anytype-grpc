@@ -218,7 +218,7 @@ class Types:
 
         This adds the relations to the type's relation links so objects of the
         type can carry those properties. To control which relations are shown
-        and in what order, use ``set_recommended_relations`` instead.
+        and in what order, use ``set_recommended_relations``.
 
         Args:
             type_url: the type object id (also called objectTypeUrl). This is the
@@ -260,10 +260,10 @@ class Types:
         """Set the recommended relations of a type (the visible property list).
 
         This replaces the type's recommended relations with the given list, in
-        order. Note the difference from ``add_relations``: this call takes
-        relation OBJECT IDS (the "id" of each relation object), not relation
-        keys. Get a relation's object id from its create response or by searching
-        for relation objects.
+        order. Compared with ``add_relations``: this call takes relation OBJECT
+        IDS (the "id" of each relation object), where ``add_relations`` takes
+        relation keys. Get a relation's object id from its create response or by
+        searching for relation objects.
 
         Args:
             type_object_id: the type object id (the "id" from ``list_types``).
@@ -288,9 +288,9 @@ class Types:
     def list_conflicting_relations(self, type_object_id, space_id=None):
         """List relation ids that conflict for a type.
 
-        A conflicting relation is one that appears on objects of the type but is
-        not part of the type's recommended relations. This is useful for tidying
-        a type's property list.
+        A conflicting relation is one that appears on objects of the type while
+        remaining outside the type's recommended relations. This is useful for
+        tidying a type's property list.
 
         Args:
             type_object_id: the type object id (the "id" from ``list_types``).
@@ -399,7 +399,8 @@ class Types:
         """List the existing options (choices) of a select/multi-select relation.
 
         Args:
-            relation_key: the relation key (for example "tag"), not the name.
+            relation_key: the relation key, for example "tag". This is the
+                internal key, which can differ from the display name.
 
         Returns:
             A dict from the response with "options" (a RelationOptions message as

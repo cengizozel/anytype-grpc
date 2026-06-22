@@ -28,8 +28,8 @@ space is used (set via `ANYTYPE_SPACE_ID` or the `space_id=` constructor arg).
 ## Filters and sorts
 
 You build filters and sorts with helper methods that return protobuf messages.
-You then pass a list of them into the search and subscribe methods. You never
-touch protobuf directly.
+You then pass a list of them into the search and subscribe methods. The helpers
+handle the protobuf for you.
 
 ### Condition enum
 
@@ -183,8 +183,9 @@ Start a live search subscription.
 - `space_id`: the space to subscribe in. Defaults to the client default.
 - `sub_id`: a subscription id you choose. If empty, the app generates one and
   returns it as `subId`. Reusing an existing id replaces that subscription.
-- `query`: accepted for symmetry with `search` but not sent. The subscribe RPC
-  has no full-text field, so for text matching build a "Like" filter instead.
+- `query`: accepted for symmetry with `search`, and ignored on send. The
+  subscribe RPC has no full-text field, so for text matching build a "Like"
+  filter.
 - `filters`: a list of Filter messages from `s.filter`. Optional.
 - `sorts`: a list of Sort messages from `s.sort`. Optional.
 - `keys`: relation keys to return per record. Defaults to id and name.
@@ -295,10 +296,11 @@ for h in hits:
   and the same for a sort. The helpers handle this for you; you only ever pass
   `relation_key`.
 - ObjectSearchSubscribe has no full-text field. To match text in a subscription,
-  add a filter with condition "Like" on "name" or "snippet" rather than passing
-  a query string.
+  add a filter with condition "Like" on "name" or "snippet" (a query string has
+  no effect here).
 - A search `record` and a subscription `record` are protobuf Struct messages.
   Convert one to a dict with `at.to_dict(record)`. The `search` method already
   returns dicts for you.
 - Filters combine with logical AND. For OR logic, use the filter `operator`
-  field and `nestedFilters` on the proto directly (not wrapped by these helpers).
+  field and `nestedFilters` on the proto directly (these helpers leave that to
+  you).

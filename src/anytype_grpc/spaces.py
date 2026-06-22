@@ -239,8 +239,8 @@ class Spaces:
     def select_workspace(self, workspace_id):
         """Make a workspace the active one for the app. CHANGES STATE.
 
-        Note: in current Anytype this is a legacy selector; most flows use
-        ``open_space`` instead. Provided for completeness.
+        Note: in current Anytype this is a legacy selector. Most flows use
+        ``open_space`` for this. Provided for completeness.
 
         Args:
             workspace_id: the id of the workspace (space) to select.

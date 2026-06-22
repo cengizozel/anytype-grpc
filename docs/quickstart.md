@@ -23,9 +23,9 @@ This installs the `anytype_grpc` package and the `anytype-mint-token` command.
 
 ## Mint a token
 
-The restricted Local API key is not enough for the full gRPC surface. You need a
-session token derived from your account. Mint one from your recovery phrase (the
-words you saved when you first set up Anytype):
+The full gRPC surface requires a session token derived from your account, which
+the restricted Local API key cannot provide. Mint one from your recovery phrase
+(the words you saved when you first set up Anytype):
 
 ```bash
 python -m anytype_grpc.auth
@@ -44,7 +44,7 @@ You can also set a default space so you do not pass `space_id` everywhere:
 export ANYTYPE_SPACE_ID="<your space id>"
 ```
 
-The token grants full control of your local vault. Treat it like a password and
+The token grants complete access to your local vault. Treat it like a password and
 never commit it. See [auth.md](auth.md) for why this token is needed and the
 security implications.
 
@@ -61,7 +61,7 @@ print(at.app_version())            # works even without a token
 print(at.default_space)            # the space id from ANYTYPE_SPACE_ID
 ```
 
-You can also pass everything explicitly instead of using the environment:
+You can also pass everything explicitly in code, which overrides the environment:
 
 ```python
 at = anytype_grpc.Anytype(
@@ -135,7 +135,8 @@ print("block count:", len(view.get("blocks", [])))
 ## Example 3: create an object
 
 Create a new page with a name. The first argument is the type's unique key (a
-string like `ot-page` or `ot-note`), not a type object id.
+string like `ot-page` or `ot-note`). This is the unique key, which differs from a
+type object id.
 
 ```python
 objects = at.objects
@@ -171,7 +172,7 @@ blocks.set_mark(page_id, p, "Bold", 0, 3)
 ```
 
 Note: you cannot add blocks to a Type object or a Set object. The server replies
-"restricted: Blocks". Edit those through details instead (Example 6 onward).
+"restricted: Blocks". Edit those through details (Example 6 onward).
 
 ## Example 5: build a horizontal grid
 
@@ -196,8 +197,9 @@ column blocks yourself.
 
 ## Example 6: create a set
 
-A Set is a live query over a space. Its source is a list of object type ids (not
-unique keys, the actual type object ids) that decide which objects appear in it.
+A Set is a live query over a space. Its source is a list of object type ids (the
+actual type object ids, which differ from unique keys) that decide which objects
+appear in it.
 
 ```python
 types = at.types
@@ -217,7 +219,8 @@ print("set:", set_id)
 A set or collection holds one dataview block (its id is almost always the literal
 string `"dataview"`). Use the `Views` class to change the view's type, choose
 which relations show, and set the gallery cover. Important: a gallery cover comes
-from a relation (a property that holds an image), not from a file id directly.
+from a relation, a property that holds an image, which the view reads to find the
+file id.
 
 ```python
 views = at.views

@@ -13,7 +13,7 @@ security implications are. Read this before [quickstart.md](quickstart.md).
 - You mint that token once from your recovery phrase with
   `python -m anytype_grpc.auth`, then put it in the `ANYTYPE_TOKEN` environment
   variable.
-- The token grants full control of your local vault. Treat it like a password.
+- The token grants complete access to your local vault. Treat it like a password.
 
 ## Two kinds of credential
 
@@ -21,13 +21,12 @@ security implications are. Read this before [quickstart.md](quickstart.md).
 
 The official Anytype Local HTTP API uses a pairing challenge: the desktop app
 shows a code, a client sends it back, and the app returns a short-lived API key.
-That key is intentionally scoped to the limited HTTP surface. It can search,
-create objects, set properties, and patch markdown, and roughly nothing else. It
-cannot edit the block tree, change layouts, edit dataview or set views, or set
-covers.
+That key is intentionally scoped to the limited HTTP surface: search, object
+creation, properties, and markdown. The block tree, layouts, views, and covers
+need the deeper gRPC scope described below.
 
-This library does not use that key, because that key cannot reach the operations
-this library exists to provide.
+This library relies on the full session token described below, which reaches the
+operations this library exists to provide.
 
 ### Full session token (what this library uses)
 
@@ -43,18 +42,16 @@ constructor argument or, if that is omitted, from the `ANYTYPE_TOKEN`
 environment variable, and sends it as the `("token", <value>)` metadata pair on
 each request.
 
-## Why the full token is needed
+## Why a session token is needed
 
-The whole point of `anytype-grpc` is full control: editing the block tree,
-building grids, reshaping sets and views, setting covers and icons, uploading
-files, and creating types, relations, and templates. None of that is in the
-restricted HTTP scope. The gRPC service that does provide it requires the
-session token. So if you want anything beyond the limited HTTP API, the full
-token is not optional, it is the entry ticket.
+The editing that `anytype-grpc` is built for lives in the gRPC service: the block
+tree, grids, sets and views, covers and icons, file uploads, and types,
+relations, and templates. The gRPC service authenticates with a session token,
+so you mint one from your recovery phrase and pass it as `ANYTYPE_TOKEN`.
 
-Note: a few calls work with no token at all, because they are app-level and not
-account-scoped. `at.app_version()` is one. Anything that touches your space
-needs the token.
+Note: a few calls work with no token at all, because they are app-level and
+operate above any account scope. `at.app_version()` is one. Anything that
+touches your space needs the token.
 
 ## How to mint the token safely
 
@@ -74,8 +71,8 @@ It prompts for your recovery phrase using hidden input (the characters do not
 echo), passes it to `WalletCreateSession`, and prints only the resulting token to
 standard output. The recovery phrase is:
 
-- read from hidden stdin, not from a command-line argument (so it never lands in
-  your shell history or the process list),
+- read from hidden stdin, which keeps it out of your shell history and the
+  process list,
 - never written to disk by the tool,
 - discarded from memory after the token is minted.
 
@@ -112,8 +109,8 @@ Load it however you prefer (for example with `python-dotenv`, or by sourcing it
 in your shell). The client itself only reads the process environment; it does not
 parse `.env` for you.
 
-You can also pass the token directly in code instead of using the environment,
-which is useful in tests or when you manage secrets another way:
+You can also pass the token directly in code, which overrides the environment and
+is useful in tests or when you manage secrets another way:
 
 ```python
 import anytype_grpc
@@ -134,7 +131,7 @@ The matching environment variables the client reads are:
   vault. Anyone holding either can read and change everything in your spaces.
   Never commit them, never paste them into chat or issue trackers, and never log
   them.
-- Prefer the environment or a gitignored `.env` over hardcoding the token in
+- Keep the token in the environment or a gitignored `.env`, which keeps it out of
   source. If you must hardcode it for a one-off script, delete it afterward.
 - The gRPC service listens only on the loopback interface (`127.0.0.1`), so it is
   not reachable from other machines by default. The token still matters, because
@@ -142,8 +139,9 @@ The matching environment variables the client reads are:
 - A token is a session credential. If you suspect it leaked, the safe response is
   to treat the account as compromised: the recovery phrase is the root secret,
   and protecting it is what ultimately matters.
-- Keep the desktop app updated. The internal gRPC API is not a public, stable
-  contract, and the vendored protos are pinned to a specific Anytype version.
+- Keep the desktop app updated. The internal gRPC API is a private contract that
+  can change between releases, and the vendored protos are pinned to a specific
+  Anytype version.
 
 ## Next steps
 

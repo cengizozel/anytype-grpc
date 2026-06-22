@@ -273,8 +273,10 @@ class Anytype:
             text: text content (for a text block).
             style: text style ("Paragraph", "Header1".."Header3", "Checkbox",
                 "Marked", "Toggle", "ToggleHeader1", and so on).
-            link_to: an object id to make this a link block instead of text.
-            card: if linking, render as a card (with cover) instead of inline.
+            link_to: an object id to make this a link block pointing at it (a
+                text block is the default).
+            card: if linking, render as a card with cover (an inline link is the
+                default).
         """
         block = {}
         if link_to is not None:

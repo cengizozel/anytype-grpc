@@ -27,8 +27,8 @@ objects = at.objects
   (str, number, bool, list, dict, None) and they are converted for you. Pass
   None for a key to clear that value.
 - An object type is identified by its unique key, a string like `ot-page`,
-  `ot-note`, or `ot-bookmark`, not by its object id. The create and set-type
-  calls expect this unique key.
+  `ot-note`, or `ot-bookmark`. This unique key is what the create and set-type
+  calls expect, a distinct value from the type's object id.
 - A Set is a live query: its source is a list of object type ids (or relation
   ids) that decide which objects appear. A Collection is a manually curated list.
 - The image cover is two details, `coverType=1` and `coverId=<file object id>`.
@@ -245,8 +245,9 @@ copy_id = objects.duplicate(oid)
 
 ### list_delete(object_ids)
 
-Permanently delete objects (this removes them, it is not the bin). Returns the
-raw response message. To move to the bin instead, use `set_archived(ids, True)`.
+Permanently delete objects (this removes them outright, a separate action from
+the bin). Returns the raw response message. To move objects to the bin, use
+`set_archived(ids, True)`.
 
 - `object_ids`: list of object ids; a single string is wrapped.
 
@@ -313,8 +314,9 @@ oneof params.
 - `no_collection`: if True, do not wrap imported files in a collection.
 - `create_directory_pages`: if True, create a page per source directory.
 - `include_properties_as_block`: if True, render frontmatter properties as a
-  block instead of object relations.
-- `update_existing`: if True, update existing objects instead of duplicating.
+  block (object relations are the default).
+- `update_existing`: if True, update existing objects in place (duplicating is
+  the default).
 - `no_progress`: if True (default), suppress progress events.
 
 ```python
@@ -367,10 +369,10 @@ print(len(g.get("nodes", [])), len(g.get("edges", [])))
   detail-editing RPCs (`set_details`, `list_set_details`) carry details as a
   repeated `Detail` list. Both accept the same plain Python dict here; the module
   handles the difference.
-- A bookmark's URL lives in the `source` detail, not a dedicated field.
+- A bookmark's URL lives in the `source` detail, a general-purpose field.
 - `list_delete` is a hard delete. Use `set_archived(ids, True)` to send objects
-  to the bin instead.
+  to the bin.
 - `set_object_type` and `create` want the type unique key (for example
-  `ot-note`), not the type's object id.
+  `ot-note`), which is a distinct value from the type's object id.
 - `set_icon` requires exactly one of `emoji` or `file_object_id` and raises
   ValueError otherwise.

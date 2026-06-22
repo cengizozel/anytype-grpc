@@ -47,7 +47,7 @@ enum numbers) are:
 | tag | a tag object |
 
 The full map is `anytype_grpc.types.LAYOUTS`. You may also pass the raw int enum
-number instead of a name.
+number directly.
 
 ## Format names
 
@@ -151,10 +151,10 @@ t.remove_relations(type_id, ["dueDate"])
 Set the type's recommended relations (the visible property list), in order. This
 replaces the existing list.
 
-Important: this takes relation OBJECT IDS (the `id` of each relation object), not
-relation keys. Get a relation's object id from its create response (`objectId`)
-or by searching for relation objects. This differs from `add_relations`, which
-takes relation keys.
+Important: this takes relation OBJECT IDS (the `id` of each relation object). Get
+a relation's object id from its create response (`objectId`) or by searching for
+relation objects. `add_relations` takes relation keys, which are a separate
+identifier on the same relation object.
 
 - `type_object_id`: the type object id, from `list_types`.
 - `relation_object_ids`: an ordered list of relation object ids.
@@ -230,7 +230,8 @@ rel_id = res["objectId"]    # use with set_recommended_relations
 
 List the existing options (choices) of a select or multi-select relation.
 
-- `relation_key`: the relation key (for example "tag"), not the name.
+- `relation_key`: the relation key, for example "tag". This is the internal key,
+  which can differ from the display name.
 
 Returns a dict with `options`: a RelationOptions message as a dict, whose inner
 `options` list holds `{id, text, color, ...}` entries.
