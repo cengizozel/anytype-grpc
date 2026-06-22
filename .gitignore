@@ -1,0 +1,31 @@
+# Secrets: never commit credentials, tokens, or recovery phrases
+.env
+*.token
+*token*.txt
+*secret*
+*credential*
+*.key
+*.pem
+grpc-token
+mnemonic*
+
+# Local scratch / test data (may contain personal space content)
+scratch/
+*.backup.md
+*_backup.md
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db

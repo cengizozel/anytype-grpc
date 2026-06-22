@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anytype-grpc"
+version = "0.1.0"
+description = "Full-control Python client and MCP server for Anytype, over its internal gRPC API."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Cengiz Ozel" }]
+keywords = ["anytype", "grpc", "automation", "mcp", "knowledge-base"]
+dependencies = [
+    "grpcio>=1.60",
+    "protobuf>=4.25",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp[cli]>=1.2"]
+dev = ["grpcio-tools>=1.60", "pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/cengizozel/anytype-grpc"
+Repository = "https://github.com/cengizozel/anytype-grpc"
+
+[project.scripts]
+anytype-mint-token = "anytype_grpc.auth:main"
+anytype-grpc-mcp = "anytype_grpc.mcp_server:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["anytype_grpc*"]
+
+[tool.setuptools.package-data]
+anytype_grpc = ["_pb/**/*.py"]
