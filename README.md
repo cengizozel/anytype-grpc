@@ -59,19 +59,34 @@ results = at.search("project", space_id=space)   # full-text search
 page = results[0]["id"]
 
 # read the whole object (blocks + details)
-obj = at.get_object(page, space_id=space)
+obj = at.objects.show(page)
 
-# edit the block tree
-bid = at.add_block(page, text="A new heading", style="Header2")
-at.add_block(page, target_id=bid, position="Bottom", text="some body text")
+# edit the block tree (namespaces group the full API by domain)
+at.blocks.add_header(page, "A new heading", level=2)
+at.blocks.add_text(page, "some body text")
 
 # set a property
-at.set_details(page, {"description": "edited by anytype-grpc"})
+at.objects.set_details(page, {"description": "edited by anytype-grpc"})
+
+# make a set, turn it into a gallery, choose its columns
+new_set = at.objects.create_set([type_id], details={"name": "My gallery"})
+at.views.set_view_type(new_set, "Gallery")
+at.views.set_visible_columns(new_set, ["name", "status"])
 ```
 
 ## Two layers
 
-**1. Ergonomic helpers** for the common operations (search, covers, block edits, views, file upload). See the [docs](docs/) for the full list.
+**1. Ergonomic namespaces** group the full helper API by domain. Each is reached on the client:
+
+- `at.blocks` blocks: text, headers, checkboxes, toggles, code, links, files, tables, grids
+- `at.objects` objects: create, show, details, covers, icons, archive, import, export
+- `at.views` set and query views: type, columns, covers, filters, sorts
+- `at.files` files and images: upload, download, offload, usage
+- `at.types` types, relations (properties), options, templates
+- `at.spaces` spaces and account: list, create, info, invites, members
+- `at.query` advanced search and live subscriptions
+
+A few of the most common operations also have top-level shortcuts (`at.search`, `at.get_object`, `at.add_block`). See the [docs](docs/) for every method.
 
 **2. Generic access to every method.** Anything the app can do is reachable, even if there is no hand-written helper:
 

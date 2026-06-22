@@ -17,6 +17,7 @@ operations this file does not wrap by hand yet.
 """
 
 import os
+from functools import cached_property
 
 import grpc
 from google.protobuf import json_format
@@ -320,6 +321,52 @@ class Anytype:
                       style=self.request_type("BlockTextSetStyle")
                       .DESCRIPTOR.fields_by_name["style"].enum_type
                       .values_by_name[style].number)
+
+    # ----- namespaces (the comprehensive, domain-organized API) ---------------
+    # Each namespace is a class wrapping this client. Built lazily on first use.
+    # Example: at.blocks.add_header(page, "Title"); at.views.set_view_type(s, "Gallery")
+
+    @cached_property
+    def blocks(self):
+        """Block tree editing: add, move, delete, restyle, grids, tables, toggles."""
+        from .blocks import Blocks
+        return Blocks(self)
+
+    @cached_property
+    def objects(self):
+        """Object lifecycle: create, show, details, covers, archive, import/export."""
+        from .objects import Objects
+        return Objects(self)
+
+    @cached_property
+    def views(self):
+        """Dataview and set/query views: type, columns, covers, filters, sorts."""
+        from .views import Views
+        return Views(self)
+
+    @cached_property
+    def files(self):
+        """Files and images: upload, download, offload, usage."""
+        from .files import Files
+        return Files(self)
+
+    @cached_property
+    def types(self):
+        """Types, relations (properties), options, and templates."""
+        from .types import Types
+        return Types(self)
+
+    @cached_property
+    def spaces(self):
+        """Spaces and account: list, create, info, invites, participants."""
+        from .spaces import Spaces
+        return Spaces(self)
+
+    @cached_property
+    def query(self):
+        """Advanced search and subscriptions (filters, sorts, live updates)."""
+        from .search import Search
+        return Search(self)
 
     def __repr__(self):
         return f"Anytype(address={self.address!r}, authed={bool(self.token)})"
