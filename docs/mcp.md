@@ -27,7 +27,7 @@ transport, which is what desktop MCP clients launch and talk to.
 The MCP extra pulls in the `mcp` SDK:
 
 ```
-pip install "anytype-grpc[mcp]"
+pip install "anytype-grpc[mcp] @ git+https://github.com/cengizozel/anytype-grpc.git"
 ```
 
 From a checkout (editable):

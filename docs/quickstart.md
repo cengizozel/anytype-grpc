@@ -15,8 +15,8 @@ first. For each domain in depth, see the domain guides linked from
 ## Install
 
 ```bash
-pip install anytype-grpc          # the core client
-pip install "anytype-grpc[mcp]"   # also install the bundled MCP server
+pip install "anytype-grpc @ git+https://github.com/cengizozel/anytype-grpc.git"  # core client (not on PyPI yet)
+pip install "anytype-grpc[mcp] @ git+https://github.com/cengizozel/anytype-grpc.git"  # plus the MCP server
 ```
 
 This installs the `anytype_grpc` package and the `anytype-mint-token` command.

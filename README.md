@@ -23,12 +23,23 @@ The desktop app runs a local helper process that serves gRPC on a loopback port.
 
 ## Install
 
+This is not on PyPI yet, so install it from source.
+
+Straight from GitHub:
+
 ```bash
-pip install anytype-grpc          # core client
-pip install "anytype-grpc[mcp]"   # also install the MCP server
+pip install "anytype-grpc[mcp] @ git+https://github.com/cengizozel/anytype-grpc.git"
 ```
 
-Requires the Anytype desktop app to be running on the same machine.
+Or clone and install editable, which is handy for reading or changing the code:
+
+```bash
+git clone https://github.com/cengizozel/anytype-grpc.git
+cd anytype-grpc
+pip install -e ".[mcp]"
+```
+
+Drop the `[mcp]` extra if you only want the client without the MCP server. Requires the Anytype desktop app to be running on the same machine.
 
 ## Authenticate
 
