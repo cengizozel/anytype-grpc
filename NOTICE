@@ -1,0 +1,6 @@
+anytype-grpc
+Copyright (c) 2026 Cengiz Ozel
+
+This project vendors Protocol Buffer definitions under protos/ that are copied
+from anyproto/anytype-heart (https://github.com/anyproto/anytype-heart),
+licensed under the MIT License by Any Association.
