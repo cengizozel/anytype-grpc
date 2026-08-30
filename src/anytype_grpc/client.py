@@ -117,7 +117,12 @@ class Anytype:
         field = message.DESCRIPTOR.fields_by_name.get(key)
         if field is None:
             raise AnytypeError(f"{message.DESCRIPTOR.name} has no field {key!r}")
-        if field.label == field.LABEL_REPEATED:
+        # protobuf >= 6 removed FieldDescriptor.label; is_repeated is the
+        # replacement and also exists on older releases.
+        repeated = getattr(field, "is_repeated", None)
+        if repeated is None:
+            repeated = field.label == field.LABEL_REPEATED
+        if repeated:
             getattr(message, key).extend(value)
         elif field.type == field.TYPE_MESSAGE:
             getattr(message, key).CopyFrom(value)
