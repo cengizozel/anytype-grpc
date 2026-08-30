@@ -15,17 +15,32 @@ import grpc
 def candidate_ports(process_hint="anytype"):
     """Return loopback ports held by the anytype helper process.
 
-    Uses ``ss -tlnp`` (Linux). Returns an empty list if ``ss`` is unavailable or
-    the process is not found, in which case the caller should fall back to an
-    explicit address.
+    Uses ``ss -tlnp`` on Linux, falling back to ``lsof`` on macOS. Returns an
+    empty list if neither works or the process is not found, in which case
+    the caller should fall back to an explicit address.
     """
+    ports = set()
     try:
         out = subprocess.run(
             ["ss", "-tlnp"], capture_output=True, text=True, timeout=5
         ).stdout
     except (FileNotFoundError, subprocess.SubprocessError):
+        out = ""
+    for line in out.splitlines():
+        if process_hint.lower() in line.lower():
+            for p in re.findall(r"127\.0\.0\.1:(\d+)", line):
+                ports.add(int(p))
+    if ports:
+        return sorted(ports)
+    # macOS (no ``ss``): list listening TCP sockets via lsof and filter by
+    # the owning command name.
+    try:
+        out = subprocess.run(
+            ["lsof", "-nP", "-iTCP", "-sTCP:LISTEN"],
+            capture_output=True, text=True, timeout=5,
+        ).stdout
+    except (FileNotFoundError, subprocess.SubprocessError):
         return []
-    ports = set()
     for line in out.splitlines():
         if process_hint.lower() in line.lower():
             for p in re.findall(r"127\.0\.0\.1:(\d+)", line):
